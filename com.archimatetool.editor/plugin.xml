@@ -317,6 +317,13 @@
          </propertySection>
          <propertySection
                afterSection="lineColorSection"
+               class="com.archimatetool.editor.propertysections.LineWidthSection"
+               filter="com.archimatetool.editor.propertysections.LineWidthSection$Filter"
+               id="lineWidthSection"
+               tab="appearance.tab">
+         </propertySection>
+         <propertySection
+               afterSection="lineWidthSection"
                class="com.archimatetool.editor.propertysections.TextAlignmentSection"
                filter="com.archimatetool.editor.propertysections.TextAlignmentSection$Filter"
                id="textAlignmentSection"

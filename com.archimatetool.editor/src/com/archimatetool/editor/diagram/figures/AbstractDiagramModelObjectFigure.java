@@ -81,9 +81,22 @@ implements IDiagramModelObjectFigure {
      * @param graphics
      */
     protected void drawFigure(Graphics graphics) {
+        setLineWidth(graphics);
+        
         if(getFigureDelegate() != null) {
             getFigureDelegate().drawFigure(graphics);
         }
+    }
+    
+    /**
+     * Set line width according to model
+     * @param graphics
+     */
+    protected void setLineWidth(Graphics graphics) {
+        // Line width
+        int lineWidth = getDiagramModelObject().getLineWidth();
+        graphics.setLineWidth(lineWidth);
+        graphics.setClip(getBounds().getCopy().expand(lineWidth, lineWidth));
     }
     
     /**
