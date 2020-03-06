@@ -17,6 +17,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.GraphicsSource;
+import org.eclipse.draw2d.Layer;
+import org.eclipse.draw2d.LayeredPane;
 import org.eclipse.draw2d.LightweightSystem;
 import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Dimension;
@@ -26,12 +28,14 @@ import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.gef.DefaultEditDomain;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
+import org.eclipse.gef.LayerConstants;
 import org.eclipse.gef.MouseWheelHandler;
 import org.eclipse.gef.MouseWheelZoomHandler;
 import org.eclipse.gef.SnapToGeometry;
 import org.eclipse.gef.SnapToGrid;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.dnd.TemplateTransferDragSourceListener;
+import org.eclipse.gef.editparts.ScalableFreeformRootEditPart;
 import org.eclipse.gef.editparts.ZoomManager;
 import org.eclipse.gef.internal.InternalGEFPlugin;
 import org.eclipse.gef.palette.PaletteListener;
@@ -331,8 +335,25 @@ implements IDiagramModelEditor, IContextProvider, ITabbedPropertySheetPageContri
         
         // Listen to selections
         hookSelectionListener();
+        
+        // Move Connection Layer below Primary Layer
+        moveConnectionLayer(false);
     }
     
+    public void moveConnectionLayer(boolean above) {
+        ScalableFreeformRootEditPart rootEditPart = (ScalableFreeformRootEditPart)getGraphicalViewer().getRootEditPart();
+        Layer connectionLayer = (Layer)rootEditPart.getLayer(LayerConstants.CONNECTION_LAYER);
+        Layer primaryLayer = (Layer)rootEditPart.getLayer(LayerConstants.PRIMARY_LAYER);
+        LayeredPane printableLayers = (LayeredPane)rootEditPart.getLayer(LayerConstants.PRINTABLE_LAYERS);
+        
+        if(above) {
+            printableLayers.addLayerAfter(primaryLayer, LayerConstants.PRIMARY_LAYER, connectionLayer);
+        }
+        else {
+            printableLayers.addLayerAfter(connectionLayer, LayerConstants.CONNECTION_LAYER, primaryLayer);
+        }
+    }
+
     @Override
     protected void createGraphicalViewer(Composite parent) {
         // NOTE from Phillipus - the bug only seems to affect Windows and only when dragging from
