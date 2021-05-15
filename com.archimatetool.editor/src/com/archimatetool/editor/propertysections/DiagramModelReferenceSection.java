@@ -5,11 +5,6 @@
  */
 package com.archimatetool.editor.propertysections;
 
-import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.PlatformUI;
-
-import com.archimatetool.model.IArchimatePackage;
 import com.archimatetool.model.IDiagramModelReference;
 
 
@@ -19,10 +14,8 @@ import com.archimatetool.model.IDiagramModelReference;
  * 
  * @author Phillip Beauvoir
  */
-public class DiagramModelReferenceSection extends AbstractECorePropertySection {
+public class DiagramModelReferenceSection extends AbstractNameDocumentationSection {
     
-    private static final String HELP_ID = "com.archimatetool.help.elementPropertySection"; //$NON-NLS-1$
-
     /**
      * Filter to show or reject this section depending on input value
      */
@@ -45,37 +38,6 @@ public class DiagramModelReferenceSection extends AbstractECorePropertySection {
         }
     }
 
-    private PropertySectionTextControl fTextName;
-    
-    @Override
-    protected void createControls(Composite parent) {
-        fTextName = createNameControl(parent, Messages.DiagramModelReferenceSection_0);
-
-        // Help
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, HELP_ID);
-    }
-    
-    @Override
-    protected void notifyChanged(Notification msg) {
-        if(msg.getNotifier() == getFirstSelectedObject()) {
-            Object feature = msg.getFeature();
-            
-            if(feature == IArchimatePackage.Literals.NAMEABLE__NAME) {
-                update();
-                updatePropertiesLabel(); // Update Main label
-            }
-        }
-    }
-
-    @Override
-    protected void update() {
-        if(fIsExecutingCommand) {
-            return; 
-        }
-        
-        fTextName.refresh(getFirstSelectedObject());
-    }
-    
     @Override
     protected IObjectFilter getFilter() {
         return new Filter();
