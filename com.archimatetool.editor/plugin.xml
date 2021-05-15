@@ -439,6 +439,7 @@
                tab="main.tab">
          </propertySection>
          <propertySection
+               afterSection="viewpointSection"
                class="com.archimatetool.editor.propertysections.DiagramModelReferenceSection"
                filter="com.archimatetool.editor.propertysections.DiagramModelReferenceSection$Filter"
                id="diagramModelReferenceSection"

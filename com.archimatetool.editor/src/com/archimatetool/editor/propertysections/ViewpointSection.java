@@ -5,6 +5,7 @@
  */
 package com.archimatetool.editor.propertysections;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.gef.commands.Command;
@@ -26,6 +27,7 @@ import org.eclipse.ui.PlatformUI;
 import com.archimatetool.editor.model.commands.EObjectFeatureCommand;
 import com.archimatetool.model.IArchimateDiagramModel;
 import com.archimatetool.model.IArchimatePackage;
+import com.archimatetool.model.IDiagramModelReference;
 import com.archimatetool.model.viewpoints.IViewpoint;
 import com.archimatetool.model.viewpoints.ViewpointManager;
 
@@ -52,6 +54,25 @@ public class ViewpointSection extends AbstractECorePropertySection {
         @Override
         public Class<?> getAdaptableType() {
             return IArchimateDiagramModel.class;
+        }
+        
+        @Override
+        public Object adaptObject(Object object) {
+            Object adapted = super.adaptObject(object);
+            
+            if(adapted != null) {
+                return adapted;
+            }
+            
+            // View Reference
+            if(object instanceof IAdaptable) {
+                adapted = ((IAdaptable)object).getAdapter(IDiagramModelReference.class);
+                if(adapted instanceof IDiagramModelReference && isRequiredType(((IDiagramModelReference)adapted).getReferencedModel())) {
+                    return ((IDiagramModelReference)adapted).getReferencedModel();
+                }
+            }
+            
+            return null;
         }
     }
 
