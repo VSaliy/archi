@@ -1,12 +1,20 @@
 package com.archimatetool.editor.diagram.directedit;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.tools.CellEditorLocator;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.window.DefaultToolTip;
+import org.eclipse.jface.window.ToolTip;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
@@ -17,6 +25,9 @@ import org.eclipse.swt.widgets.Text;
 import com.archimatetool.editor.diagram.figures.IDiagramModelObjectFigure;
 import com.archimatetool.editor.diagram.figures.connections.IDiagramConnectionFigure;
 import com.archimatetool.editor.utils.StringUtils;
+import com.archimatetool.model.IArchimateConcept;
+import com.archimatetool.model.IDiagramModelArchimateComponent;
+import com.archimatetool.model.IFolder;
 import com.archimatetool.model.INameable;
 import com.archimatetool.model.ITextAlignment;
 import com.archimatetool.model.ITextContent;
@@ -34,6 +45,7 @@ public class MultiLineTextDirectEditManager extends AbstractDirectEditManager {
     
     private boolean isSingleText;
     private IFigure referenceFigure;
+    private DefaultToolTip duplicateNameToolTip;
     
     public MultiLineTextDirectEditManager(GraphicalEditPart source) {
         this(source, false);
@@ -104,6 +116,52 @@ public class MultiLineTextDirectEditManager extends AbstractDirectEditManager {
 
             getTextControl().addTraverseListener(traverseListener);
         }
+
+        hookDuplicateNameHandler();
+    }
+    
+    private void hookDuplicateNameHandler() {
+        if(!(getEditPart().getModel() instanceof IDiagramModelArchimateComponent)) {
+            return;
+        }
+        
+        // Collect names of all concept types
+        Set<String> names = new HashSet<>();
+        
+        IArchimateConcept thisConcept = ((IDiagramModelArchimateComponent)getEditPart().getModel()).getArchimateConcept();
+        IFolder folder = thisConcept.getArchimateModel().getDefaultFolderForObject(thisConcept);
+
+        for(Iterator<EObject> iter = folder.eAllContents(); iter.hasNext();) {
+            EObject eObject = iter.next();
+            if(eObject instanceof IArchimateConcept && eObject != thisConcept && eObject.eClass() == thisConcept.eClass()) {
+                names.add(((IArchimateConcept)eObject).getName());
+            }
+        }
+        
+        if(names.isEmpty()) {
+            return;
+        }
+        
+        getTextControl().addVerifyListener(event -> {
+            String currentText = ((Text)event.widget).getText();
+            String newText = currentText.substring(0, event.start) + event.text + currentText.substring(event.end);
+            
+            hideDuplicateNameToolTip();
+            
+            if(names.contains(newText)) {
+                duplicateNameToolTip = new DefaultToolTip(getTextControl(), ToolTip.NO_RECREATE, true);
+                duplicateNameToolTip.setHideDelay(3000);
+                duplicateNameToolTip.setText(NLS.bind("''{0}'' is already used", newText));
+                duplicateNameToolTip.show(new Point(0, -25));
+            }
+        });
+    }
+    
+    private void hideDuplicateNameToolTip() {
+        if(duplicateNameToolTip != null) {
+            duplicateNameToolTip.hide();
+            duplicateNameToolTip = null;
+        }
     }
 
     /**
@@ -112,6 +170,8 @@ public class MultiLineTextDirectEditManager extends AbstractDirectEditManager {
     @Override
     protected void unhookListeners() {
         super.unhookListeners();
+        
+        hideDuplicateNameToolTip();
         
         if(traverseListener != null) {
             getTextControl().removeTraverseListener(traverseListener);
@@ -175,7 +235,7 @@ public class MultiLineTextDirectEditManager extends AbstractDirectEditManager {
         }
     }
     
-    class MultiLineCellEditor extends TextCellEditor {
+    static class MultiLineCellEditor extends TextCellEditor {
         public MultiLineCellEditor(Composite composite, int style) {
             super(composite, SWT.MULTI | SWT.V_SCROLL | SWT.WRAP | style);
         }
