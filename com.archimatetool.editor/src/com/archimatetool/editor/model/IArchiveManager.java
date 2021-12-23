@@ -102,6 +102,12 @@ public interface IArchiveManager {
     }
 
     /**
+     * Set whether to use archive zip format if a model has images
+     * @param set
+     */
+    void useArchiveFormat(boolean set);
+    
+    /**
      * Add an image from an image file to this Archive Manager's storage cache.
      * If the image already exists the existing image path is returned.
      * 
@@ -198,10 +204,19 @@ public interface IArchiveManager {
      * Load all images from another Archimate Model archive file and add to this one
      * 
      * @param file The model file
-     * @return if the images could be loaded
+     * @return true if the images could be loaded
      * @throws IOException
      */
     boolean loadImagesFromModelFile(File file) throws IOException;
+    
+    /**
+     * Load all images from another Archimate Model expanded file and add to this one
+     * 
+     * @param file The model file
+     * @return true if the images could be loaded
+     * @throws IOException
+     */
+    boolean loadImagesFromModelFolder(File file) throws IOException;
     
     /**
      * @return True if the model currently has references to at least one image and the image is loaded

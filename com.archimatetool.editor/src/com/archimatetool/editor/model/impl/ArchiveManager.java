@@ -14,6 +14,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -64,10 +66,22 @@ public class ArchiveManager implements IArchiveManager {
     private boolean fImagesLoaded = false;
     
     /**
+     * Use archive method to store images in zip file
+     * If false images will be saved in a sub-folder
+     * This could be set to false for a certain condition such as the model file exists in a git folder
+     */
+    private boolean useArchiveFormat = true;
+    
+    /**
      * @param model The owning model
      */
     public ArchiveManager(IArchimateModel model) {
         fModel = model;
+    }
+    
+    @Override
+    public void useArchiveFormat(boolean set) {
+        useArchiveFormat = set;
     }
 
     @Override
@@ -146,8 +160,13 @@ public class ArchiveManager implements IArchiveManager {
      */
     @Override
     public void loadImages() throws IOException {
-        if(!fImagesLoaded && loadImagesFromModelFile(fModel.getFile())) {
-            fImagesLoaded = true;
+        if(!fImagesLoaded) {
+            if(useArchiveFormat) {
+                fImagesLoaded = loadImagesFromModelFile(fModel.getFile());
+            }
+            else {
+                fImagesLoaded = loadImagesFromModelFolder(fModel.getFile());
+            }
         }
     }
     
@@ -172,6 +191,36 @@ public class ArchiveManager implements IArchiveManager {
         }
         
         zipFile.close();
+        
+        return true;
+    }
+    
+    @Override
+    public boolean loadImagesFromModelFolder(File file) throws IOException {
+        if(file == null || !file.exists()) {
+            return false;
+        }
+        
+        File imageFolder = new File(file.getParentFile(), "images"); //$NON-NLS-1$
+        
+        if(!imageFolder.exists()) {
+            return false;
+        }
+        
+        for(File imageFile : imageFolder.listFiles()) {
+            String entryName = "images/" + imageFile.getName(); //$NON-NLS-1$
+            
+            if(!byteArrayStorage.hasEntry(entryName)) {
+                byte[] bytes = Files.readAllBytes(imageFile.toPath());
+                try {
+                    testImageBytesValid(bytes);
+                    byteArrayStorage.addByteContentEntry(entryName, bytes);
+                }
+                catch(IOException ex) {
+                    // Ignore
+                }
+            }
+        }
         
         return true;
     }
@@ -243,8 +292,20 @@ public class ArchiveManager implements IArchiveManager {
             return;
         }
         
+        // Delete the images folder if not using the archive format
+        // TODO: Delete only if it is safe to do so, for example the model file is in a git folder
+        if(!useArchiveFormat) {
+            File imageFolder = new File(file.getParentFile(), "images"); //$NON-NLS-1$
+            FileUtils.deleteFolder(imageFolder);
+        }
+        
         if(hasImages()) {
-            saveModelToArchiveFile(file);
+            if(useArchiveFormat) {
+                saveModelToArchiveFile(file);
+            }
+            else {
+                saveModelToExpandedFile(file);
+            }
         }
         else {
             saveResource(file);
@@ -272,6 +333,24 @@ public class ArchiveManager implements IArchiveManager {
             
             // Add any images
             saveImages(zOut);
+        }
+    }
+    
+    /**
+     * Save the model to Expanded File format
+     */
+    private void saveModelToExpandedFile(File file) throws IOException {
+        saveResource(file);
+        
+        File imageFolder = new File(file.getParentFile(), "images"); //$NON-NLS-1$
+        imageFolder.mkdirs();
+        
+        for(String imagePath : getImagePaths()) {
+            byte[] bytes = byteArrayStorage.getEntry(imagePath);
+            if(bytes != null) {
+                File imageFile = new File(file.getParentFile(), imagePath);
+                Files.write(imageFile.toPath(), bytes, StandardOpenOption.CREATE);
+            }
         }
     }
     
