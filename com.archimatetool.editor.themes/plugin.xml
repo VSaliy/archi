@@ -3,21 +3,17 @@
 <plugin>
     <extension
           point="org.eclipse.e4.ui.css.swt.theme">
+       <theme
+             basestylesheeturi="themes/archi/css/archi.css"
+             id="com.archimatetool.editor.theme.archi"
+             label="Archi">
+       </theme>
       <theme
             basestylesheeturi="themes/archi/css/basic.css"
             id="com.archimatetool.editor.theme.basic"
             label="Basic">
       </theme>
 		
-        <stylesheet
-            uri="themes/archi/css/basic.css">
-            <osgiresourcelocator
-                uri="platform:/plugin/com.archimatetool.editor.themes/themes/archi/images/">
-            </osgiresourcelocator>
-            <themeid
-                refid="com.archimatetool.editor.theme.basic">
-            </themeid>
-        </stylesheet>
     </extension>
    
 	<extension
