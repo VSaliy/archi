@@ -113,7 +113,7 @@
       </page>
       <page
             class="com.archimatetool.editor.preferences.GeneralPreferencePage"
-            id="com.archimatetool.editor.prefsGeneral"
+            id="org.eclipse.ui.preferencePages.Workbench"
             name="%prefsGeneral">
          <keywordReference
                id="keywords.prefsGeneral">
@@ -135,6 +135,11 @@
          <keywordReference
                id="keywords.prefsConnections">
          </keywordReference>
+      </page>
+      <page
+            class="com.archimatetool.editor.preferences.OtherPreferencesPage"
+            id="org.eclipse.ui.preferencePages.Workbench"
+            name="Network &amp; Security">
       </page>
    </extension>
    <extension

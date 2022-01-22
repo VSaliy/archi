@@ -22,6 +22,7 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 import com.archimatetool.editor.ArchiPlugin;
 import com.archimatetool.editor.preferences.IPreferenceConstants;
+import com.archimatetool.editor.utils.NetUtils;
 import com.archimatetool.editor.utils.StringUtils;
 
 
@@ -38,7 +39,7 @@ public class CheckForNewVersionAction extends Action {
     }
     
     String getOnlineVersion(URL url) throws IOException {
-        URLConnection connection = url.openConnection();
+        URLConnection connection = NetUtils.openConnection(url);
         connection.connect();
         
         InputStream is = connection.getInputStream();
