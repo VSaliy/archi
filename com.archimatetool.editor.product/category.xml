@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <bundle id="com.archimatetool.editor.tests">
+      <category name="Archi"/>
+   </bundle>
+   <bundle id="com.archimatetool.testsupport">
+      <category name="Archi"/>
+   </bundle>
+   <bundle id="org.junit">
+      <category name="JUnit"/>
+   </bundle>
+   <bundle id="org.hamcrest.core">
+      <category name="JUnit"/>
+   </bundle>
+   <category-def name="Archi" label="Archi">
+      <description>
+         Archi Tests
+      </description>
+   </category-def>
+   <category-def name="JUnit" label="JUnit">
+      <description>
+         JUnit Support
+      </description>
+   </category-def>
+</site>
